@@ -3,174 +3,213 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fintech Dashboard Pro</title>
+<title>Fintech Dashboard</title>
+
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
 <style>
 body { background:#0b0f1a; color:white; font-family:system-ui; }
-.glass { background: rgba(255,255,255,0.05); backdrop-filter: blur(15px); border:1px solid rgba(255,255,255,0.1); box-shadow: 0 8px 32px rgba(0,0,0,0.3); transition: all 0.3s; }
-.glass:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,0.4); }
-button { transition: all 0.2s ease; }
-button:hover { transform: translateY(-2px); filter: brightness(1.1); }
-.toast { position:fixed; bottom:20px; right:20px; background:#111; padding:14px 20px; border-radius:12px; opacity:0; font-weight:500; box-shadow:0 4px 12px rgba(0,0,0,0.5); transition: opacity 0.3s ease, transform 0.3s ease; transform: translateY(20px); }
-.fade-in { animation:fade .4s ease forwards; }
-@keyframes fade { from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
-.service-card { cursor:pointer; transition: transform 0.2s, box-shadow 0.2s; display:flex; align-items:center; justify-content:center; gap:6px; font-weight:500; }
-.service-card:hover { transform: translateY(-3px); box-shadow:0 8px 20px rgba(0,0,0,0.5); }
-#socialBtn { position:fixed; bottom:20px; right:20px; display:flex; flex-direction:column; align-items:flex-end; gap:10px; z-index:1000; }
-#socialLinks a { background: rgba(255,255,255,0.08); backdrop-filter: blur(15px); border:1px solid rgba(255,255,255,0.15); padding:10px 12px; border-radius:12px; color:#facc15; display:flex; align-items:center; gap:6px; text-decoration:none; font-weight:500; box-shadow:0 4px 12px rgba(0,0,0,0.3); transition: transform 0.2s, background 0.2s; }
-#socialLinks a:hover { transform: translateX(4px); background: rgba(255,255,255,0.15); }
 
-/* Promo carousel */
-#promoCarousel { overflow-x: auto; display: flex; gap:12px; scroll-behavior: smooth; }
-.promo-card { min-width:200px; padding:12px; border-radius:16px; background: linear-gradient(120deg,#facc15,#fbbf24); color:#000; font-weight:600; flex-shrink:0; box-shadow:0 8px 20px rgba(0,0,0,0.4); transition: transform 0.2s; }
-.promo-card:hover { transform: translateY(-4px); }
+.glass {
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(12px);
+  border:1px solid rgba(255,255,255,0.1);
+}
 
-/* QR buttons */
-.qr-btn { display:flex; align-items:center; gap:6px; justify-content:center; font-weight:500; border-radius:12px; padding:10px; background: linear-gradient(90deg,#facc15,#fbbf24); color:#000; transition: transform 0.2s; }
-.qr-btn:hover { transform: translateY(-2px); }
+.fade-in { animation:fade .4s ease; }
+@keyframes fade { from{opacity:0;transform:translateY(10px);} to{opacity:1;} }
+
+.toast {
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  background:#111;
+  padding:12px;
+  border-radius:8px;
+  opacity:0;
+  transition:.3s;
+}
+button:hover { opacity:.9; }
 </style>
 </head>
+
 <body class="p-4">
 
 <script>
-if(localStorage.getItem("loggedIn")!=="true"){ location.href="login.html"; }
+if(localStorage.getItem("loggedIn") !== "true"){
+  location.href = "login.html";
+}
 </script>
 
 <!-- HEADER -->
-<div class="flex justify-between items-center mb-6">
-  <h1 class="font-bold text-2xl tracking-tight">💳 Fintech Pro</h1>
-  <button onclick="logout()" class="text-red-400 font-semibold hover:text-red-500 transition">Logout</button>
+<div class="flex justify-between mb-6">
+  <h1 class="font-bold">💳 Fintech</h1>
+  <button onclick="logout()" class="text-red-400 font-semibold">Logout</button>
 </div>
 
 <!-- WALLET -->
-<div class="glass p-6 rounded-2xl mb-6 relative">
-  <p class="text-gray-400 tracking-wide uppercase text-sm">Balance</p>
-  <h2 id="balance" class="text-3xl font-bold mt-1 tracking-tight"></h2>
-  <button onclick="toggleBalance()" class="text-yellow-400 text-sm font-semibold hover:text-yellow-300 transition absolute top-6 right-6">Toggle</button>
+<div class="glass p-6 rounded-2xl mb-6">
+  <p class="text-gray-400">Balance</p>
+  <h2 id="balance" class="text-3xl font-bold"></h2>
+  <button onclick="toggleBalance()" class="text-yellow-400 text-sm mt-1">Toggle</button>
 </div>
 
-<!-- Quick Actions -->
+<!-- ACTIONS -->
 <div class="grid grid-cols-3 gap-4 mb-6">
-  <button onclick="openModal('Send')" class="glass p-4 rounded-xl font-semibold hover:bg-yellow-50 hover:text-black transition shadow-md">Send</button>
-  <button onclick="openModal('Receive')" class="glass p-4 rounded-xl font-semibold hover:bg-yellow-50 hover:text-black transition shadow-md">Receive</button>
-  <button onclick="openModal('Fund')" class="glass p-4 rounded-xl font-semibold hover:bg-yellow-50 hover:text-black transition shadow-md">Fund</button>
+  <button onclick="openPayment('Bank')" class="glass p-4 rounded-xl font-semibold hover:bg-white/5 transition">Bank</button>
+  <button onclick="openPayment('Airtime')" class="glass p-4 rounded-xl font-semibold hover:bg-white/5 transition">Airtime</button>
+  <button onclick="openPayment('TV')" class="glass p-4 rounded-xl font-semibold hover:bg-white/5 transition">TV</button>
+  <button onclick="openPayment('Electricity')" class="glass p-4 rounded-xl font-semibold hover:bg-white/5 transition">Electricity</button>
+  <button onclick="openPayment('Internet')" class="glass p-4 rounded-xl font-semibold hover:bg-white/5 transition">Internet</button>
+  <button onclick="openPayment('Data')" class="glass p-4 rounded-xl font-semibold hover:bg-white/5 transition">Data</button>
 </div>
 
-<!-- Services -->
-<div class="grid grid-cols-3 gap-4 mb-6">
-  <div class="service-card glass p-4 rounded-xl" onclick="alert('Recharge Airtime')"><i class="fas fa-mobile-alt text-yellow-400"></i> Airtime</div>
-  <div class="service-card glass p-4 rounded-xl" onclick="alert('Pay Electricity Bill')"><i class="fas fa-bolt text-yellow-400"></i> Electricity</div>
-  <div class="service-card glass p-4 rounded-xl" onclick="alert('Pay TV Subscription')"><i class="fas fa-tv text-yellow-400"></i> TV</div>
-  <div class="service-card glass p-4 rounded-xl" onclick="alert('Pay Internet Bill')"><i class="fas fa-wifi text-yellow-400"></i> Internet</div>
-  <div class="service-card glass p-4 rounded-xl" onclick="alert('Send Money to Bank')"><i class="fas fa-university text-yellow-400"></i> Bank</div>
-  <div class="service-card glass p-4 rounded-xl" onclick="alert('Buy Data')"><i class="fas fa-sim-card text-yellow-400"></i> Data</div>
+<!-- CHART -->
+<canvas id="chart" height="100" class="glass p-2 rounded-xl mb-6"></canvas>
+
+<!-- TX HISTORY -->
+<div class="glass p-4 rounded-xl">
+  <h3 class="mb-2 font-semibold">Transactions</h3>
+  <div id="txList"></div>
 </div>
 
-<!-- QR Actions -->
-<div class="grid grid-cols-2 gap-4 mb-6">
-  <button class="qr-btn" onclick="alert('Scan QR')"><i class="fas fa-qrcode"></i> Scan</button>
-  <button class="qr-btn" onclick="alert('Receive via QR')"><i class="fas fa-receipt"></i> QR Pay</button>
-</div>
-
-<!-- Promo / Offers -->
-<div class="mb-6">
-  <h3 class="mb-3 font-semibold text-lg">Promos & Offers</h3>
-  <div id="promoCarousel">
-    <div class="promo-card">Get 5% Cashback on Airtime!</div>
-    <div class="promo-card">Pay Electricity & Win Rewards!</div>
-    <div class="promo-card">TV Subscription Discount 🎉</div>
-    <div class="promo-card">Internet Bundle Special</div>
-  </div>
-</div>
-
-<!-- Chart -->
-<canvas id="chart" height="120" class="glass p-3 rounded-xl mb-6 shadow-inner"></canvas>
-
-<!-- Transactions -->
-<div class="glass p-4 rounded-xl shadow-md mb-6">
-  <h3 class="mb-3 font-semibold text-lg">Recent Transactions</h3>
-  <div id="txList" class="flex flex-col gap-2"></div>
-</div>
-
-<!-- Modal -->
-<div id="modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+<!-- PAYMENT MODAL -->
+<div id="paymentModal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50">
   <div class="glass p-6 rounded-xl w-80 shadow-xl">
-    <h3 id="modalTitle" class="text-lg font-semibold mb-3"></h3>
-    <input id="amt" type="number" placeholder="Enter amount" class="w-full p-2 mt-3 text-black rounded shadow-inner"/>
-    <button onclick="handleTx()" class="w-full bg-yellow-400 p-2 mt-4 rounded font-semibold hover:bg-yellow-300 transition">Confirm</button>
-    <button onclick="closeModal()" class="mt-2 text-gray-400 font-semibold hover:text-gray-200 transition w-full text-center">Cancel</button>
+    <h3 id="paymentTitle" class="text-lg font-semibold mb-3"></h3>
+
+    <select id="provider" class="w-full p-2 rounded text-black mb-3">
+      <option value="">Select Provider/Bank</option>
+    </select>
+
+    <input id="account" type="text" placeholder="Enter Account / Phone" class="w-full p-2 text-black rounded mb-3"/>
+    <input id="amount" type="number" placeholder="Enter Amount" class="w-full p-2 text-black rounded mb-3"/>
+
+    <button onclick="payBill()" class="w-full bg-yellow-400 p-2 mt-2 rounded font-semibold hover:bg-yellow-300 transition">Pay</button>
+    <button onclick="closePayment()" class="mt-2 text-gray-400 font-semibold hover:text-gray-200 transition w-full text-center">Cancel</button>
   </div>
 </div>
 
 <div id="toast" class="toast"></div>
 
-<!-- Social / Contact -->
-<div id="socialBtn">
-  <button id="toggleSocial" class="bg-yellow-400 w-14 h-14 rounded-full text-black text-2xl font-bold flex items-center justify-center shadow-lg hover:brightness-110 transition">📱</button>
-  <div id="socialLinks" class="hidden flex flex-col gap-2 mt-2">
-    <a href="https://www.instagram.com/smork_frmdaeast?igsh=MWwwMHowMGhvcmY0dg==" target="_blank"><i class="fab fa-instagram"></i> Instagram</a>
-    <a href="https://www.facebook.com/share/1DhHJPTRXL/" target="_blank"><i class="fab fa-facebook"></i> Facebook</a>
-    <a href="https://www.linkedin.com/in/smorkfrmdaeast" target="_blank"><i class="fab fa-linkedin"></i> LinkedIn</a>
-    <a href="https://github.com/Smorkfrmdaeast" target="_blank"><i class="fab fa-github"></i> GitHub</a>
-    <a href="mailto:ifeanyinuels32@gmail.com"><i class="fas fa-envelope"></i> Email</a>
+<!-- SOCIAL FLOATING BUTTON -->
+<div id="socialBtn" class="fixed bottom-6 right-6 flex flex-col items-end gap-2">
+  <div id="socialLinks" class="hidden flex flex-col gap-2 mb-2">
+    <a href="https://www.instagram.com/smork_frmdaeast?igsh=MWwwMHowMGhvcmY0dg==" target="_blank" class="glass p-2 rounded-full text-pink-400 flex items-center justify-center w-12 h-12">
+      <i class="fab fa-instagram"></i>
+    </a>
+    <a href="https://www.facebook.com/share/1DhHJPTRXL/" target="_blank" class="glass p-2 rounded-full text-blue-600 flex items-center justify-center w-12 h-12">
+      <i class="fab fa-facebook"></i>
+    </a>
+    <a href="https://www.linkedin.com/in/smorkfrmdaeast" target="_blank" class="glass p-2 rounded-full text-blue-400 flex items-center justify-center w-12 h-12">
+      <i class="fab fa-linkedin"></i>
+    </a>
+    <a href="https://github.com/Smorkfrmdaeast" target="_blank" class="glass p-2 rounded-full text-gray-400 flex items-center justify-center w-12 h-12">
+      <i class="fab fa-github"></i>
+    </a>
+    <a href="mailto:ifeanyinuels32@gmail.com" class="glass p-2 rounded-full text-yellow-400 flex items-center justify-center w-12 h-12">
+      <i class="fas fa-envelope"></i>
+    </a>
   </div>
+  <button id="toggleSocial" class="bg-yellow-400 w-14 h-14 rounded-full text-black text-2xl font-bold flex items-center justify-center">📱</button>
 </div>
 
 <script>
-// State
-const state = { balance:120000, tx:JSON.parse(localStorage.getItem("tx"))||[], visible:true, type:"" };
-updateUI(); drawChart();
+// STATE
+const state = {
+  balance: 120000,
+  tx: JSON.parse(localStorage.getItem("tx")) || [],
+  visible: true,
+  paymentType: ""
+};
 
-// UI
-function updateUI(){ balance.innerText=state.visible?"₦"+state.balance:"****"; renderTx(); }
-function toggleBalance(){ state.visible=!state.visible; updateUI(); }
+// INIT
+updateUI();
+drawChart();
+
+// UI FUNCTIONS
+function updateUI(){ balance.innerText = state.visible ? "₦"+state.balance : "****"; renderTx(); }
+function toggleBalance(){ state.visible = !state.visible; updateUI(); }
 function logout(){ localStorage.removeItem("loggedIn"); location.href="login.html"; }
 
-// Modal
-function openModal(type){ state.type=type; modal.classList.remove("hidden"); modalTitle.innerText=type+" Money"; }
-function closeModal(){ modal.classList.add("hidden"); }
+// PAYMENT MODAL
+const providersList = {
+  Airtime:["MTN","Glo","Airtel","9Mobile"],
+  Electricity:["EkoElectric","IKEDC","PHED"],
+  TV:["DSTV","GOtv","Startimes"],
+  Internet:["Spectranet","Smile","IPNX"],
+  Bank:["Access","GTB","Zenith","FirstBank"],
+  Data:["MTN Data","Glo Data","Airtel Data"]
+};
 
-// Transactions
-function handleTx(){ 
-  const amt=Number(document.getElementById("amt").value); if(!amt) return; 
-  toast("Processing..."); 
-  setTimeout(()=>{ 
-    if(state.type==="Send"){state.balance-=amt; addTx("Sent",-amt);}
-    if(state.type==="Receive"){state.balance+=amt; addTx("Received",amt);}
-    if(state.type==="Fund"){state.balance+=amt; addTx("Funded",amt);}
-    updateUI(); drawChart(); closeModal(); toast("Success ✅");
-  }, 800);
+function openPayment(type){
+  document.getElementById("paymentModal").classList.remove("hidden");
+  document.getElementById("paymentTitle").innerText=type+" Payment";
+
+  const providerSelect=document.getElementById("provider");
+  providerSelect.innerHTML='<option value="">Select Provider/Bank</option>';
+  providersList[type].forEach(p=>{ providerSelect.innerHTML+=`<option value="${p}">${p}</option>`; });
+
+  document.getElementById("account").value="";
+  document.getElementById("amount").value="";
+  state.paymentType=type;
+}
+function closePayment(){ document.getElementById("paymentModal").classList.add("hidden"); }
+
+function payBill(){
+  const amt=Number(document.getElementById("amount").value);
+  const provider=document.getElementById("provider").value;
+  const account=document.getElementById("account").value;
+
+  if(!amt || !provider || !account) return alert("Fill all fields");
+  if(amt>state.balance) return alert("Insufficient balance");
+
+  state.balance -= amt;
+
+  const label = state.paymentType==="Bank" ? `Bank Transfer to ${provider} (${account})` :
+                `${state.paymentType} Payment to ${provider} (${account})`;
+
+  addTx("Payment", -amt, label);
+  closePayment();
+  toast(`Paid ₦${amt} to ${provider} ✅`);
 }
 
-// Storage
-function addTx(type,amt){ state.tx.unshift({type,amt}); localStorage.setItem("tx",JSON.stringify(state.tx)); }
-
-// Render
+// TRANSACTIONS
+function addTx(type, amt, label=""){ state.tx.unshift({type, amt, label}); localStorage.setItem("tx", JSON.stringify(state.tx)); renderTx(); }
 function renderTx(){
-  txList.innerHTML=""; state.tx.slice(0,10).forEach(t=>{
-    const icon=t.type==="Sent"?'<i class="fas fa-arrow-up text-red-400"></i>':
-               t.type==="Received"?'<i class="fas fa-arrow-down text-green-400"></i>':
-               t.type==="Funded"?'<i class="fas fa-wallet text-yellow-400"></i>':'';
-    txList.innerHTML+=`<div class="flex justify-between fade-in p-2 rounded hover:bg-white/5 transition"><span>${icon} ${t.type}</span><span style="color:${t.amt>0?'#22c55e':'#ef4444'}">${t.amt>0?'+':''}₦${Math.abs(t.amt)}</span></div>`;
+  txList.innerHTML="";
+  state.tx.slice(0,10).forEach(t=>{
+    const icon = t.type==="Sent"?'<i class="fas fa-arrow-up text-red-400"></i>':
+                 t.type==="Received"?'<i class="fas fa-arrow-down text-green-400"></i>':
+                 t.type==="Funded"?'<i class="fas fa-wallet text-yellow-400"></i>':
+                 t.type==="Payment"?'<i class="fas fa-money-bill-wave text-blue-400"></i>':'';
+    const text = t.label ? t.label : t.type;
+    txList.innerHTML+=`
+    <div class="flex justify-between fade-in p-2 rounded hover:bg-white/5 transition">
+      <span>${icon} ${text}</span>
+      <span style="color:${t.amt>0?'#22c55e':'#ef4444'}">${t.amt>0?'+':''}₦${Math.abs(t.amt)}</span>
+    </div>`;
   });
 }
 
-// Toast
-function toast(msg){ const t=document.getElementById("toast"); t.innerText=msg; t.style.opacity=1; t.style.transform="translateY(0)"; setTimeout(()=>{ t.style.opacity=0; t.style.transform="translateY(20px)"; },2000); }
+// TOAST
+function toast(msg){ const t = document.getElementById("toast"); t.innerText=msg; t.style.opacity=1; setTimeout(()=>t.style.opacity=0,2000); }
 
-// Chart
+// CHART
 function drawChart(){
-  const ctx=chart.getContext("2d"); ctx.clearRect(0,0,chart.width,chart.height);
-  const vals=state.tx.slice(0,10).map(t=>t.amt); const max=Math.max(...vals.map(Math.abs),1000);
-  ctx.beginPath(); ctx.moveTo(20, chart.height-vals[0]/max*100-10);
-  ctx.strokeStyle="#facc15"; ctx.lineWidth=3;
-  for(let i=1;i<vals.length;i++){ const y=chart.height-vals[i]/max*100-10; ctx.lineTo(i*50+20,y); }
-  ctx.stroke();
+  const ctx=chart.getContext("2d");
+  ctx.clearRect(0,0,300,100);
+  const vals=state.tx.slice(0,5).map(t=>Math.abs(t.amt));
+  const max=Math.max(...vals,1000);
+  vals.forEach((v,i)=>{ const h=(v/max)*80; ctx.fillStyle="#facc15"; ctx.fillRect(i*50+10,100-h,30,h); });
 }
 
-// Social
-document.getElementById("toggleSocial").addEventListener("click", ()=>{ document.getElementById("socialLinks").classList.toggle("hidden"); });
+// SOCIAL BUTTON
+const toggleBtn = document.getElementById("toggleSocial");
+const links = document.getElementById("socialLinks");
+toggleBtn.addEventListener("click", ()=>{ links.classList.toggle("hidden"); });
 </script>
+
 </body>
-      </html>
+</html>
