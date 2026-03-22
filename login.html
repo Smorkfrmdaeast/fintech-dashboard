@@ -6,7 +6,6 @@
 <title>SMORK'S PAYDOM Login</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
-
 <style>
 body { background:#0b0f1a; color:white; font-family:system-ui; position:relative; }
 
@@ -24,7 +23,6 @@ body { background:#0b0f1a; color:white; font-family:system-ui; position:relative
 .success { color:#22c55e; }
 .error { color:#ef4444; }
 
-/* Floating social button with dashboard style */
 #socialBtn {
   position:fixed;
   bottom:20px;
@@ -40,11 +38,8 @@ body { background:#0b0f1a; color:white; font-family:system-ui; position:relative
   z-index:1000;
   transition:0.2s;
 }
-#socialBtn:hover {
-  background: rgba(255,255,255,0.1);
-}
+#socialBtn:hover { background: rgba(255,255,255,0.1); }
 
-/* Social links container */
 #socialLinks {
   position:fixed;
   bottom:80px;
@@ -68,9 +63,7 @@ body { background:#0b0f1a; color:white; font-family:system-ui; position:relative
   font-size:0.9rem;
   transition:0.2s;
 }
-#socialLinks a:hover {
-  background: rgba(255,255,255,0.1);
-}
+#socialLinks a:hover { background: rgba(255,255,255,0.1); }
 </style>
 </head>
 
@@ -147,6 +140,7 @@ loginBtn.addEventListener("click", () => {
 
   if (user.email === email && user.password === password) {
     localStorage.setItem("loggedIn", "true");
+    localStorage.setItem("loggedInEmail", email); // ✅ Save email for dashboard
     showMessage("Login successful! Redirecting... 🔐", "success");
     setTimeout(()=> location.href = "index.html", 1200);
   } else {
@@ -171,6 +165,5 @@ signupBtn.addEventListener("click", () => {
   passwordEl.value = "";
 });
 </script>
-
 </body>
 </html>
