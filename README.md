@@ -48,10 +48,10 @@ LocalStorage for persistence
 
 📱 Social / Contact
 Floating button includes quick access to:
-Instagram: @smork_frmdaeast⁠�
+Instagram: @smork_frmdaeast
 Facebook: https://www.facebook.com/share/1DhHJPTRXL/
-LinkedIn: Smorkfrmdaeast⁠�
-GitHub: Smorkfrmdaeast⁠�
+LinkedIn: Smorkfrmdaeast
+GitHub: Smorkfrmdaeast
 Email: ifeanyinuels32@gmail.com
 
 📝 Future Enhancements
