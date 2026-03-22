@@ -9,208 +9,237 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 
 <style>
-body { background: linear-gradient(120deg,#0b0f1a,#131625); color:white; font-family:system-ui; overflow-x:hidden;}
-.glass { background: rgba(255,255,255,0.05); backdrop-filter: blur(14px); border:1px solid rgba(255,255,255,0.12); transition: all 0.3s ease; }
-.glass:hover { background: rgba(255,255,255,0.08); }
-.fade-in { animation:fade .5s ease; }
+body { background:#0b0f1a; color:white; font-family:system-ui; }
+
+.glass {
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(12px);
+  border:1px solid rgba(255,255,255,0.1);
+}
+
+.fade-in { animation:fade .4s ease; }
 @keyframes fade { from{opacity:0;transform:translateY(10px);} to{opacity:1;} }
-.toast { position:fixed; bottom:20px; right:20px; background:#111; padding:14px 20px; border-radius:10px; opacity:0; transition:.4s; font-weight:600; box-shadow:0 0 12px #000; }
-.carousel { overflow:hidden; position:relative; border-radius:1rem; margin-bottom:1rem; box-shadow:0 4px 20px rgba(0,0,0,0.5);}
-.carousel-inner { display:flex; transition:transform .7s ease; }
-.carousel-item { min-width:100%; flex-shrink:0; padding:1.5rem; text-align:center; font-semibold; font-size:1rem; border-radius:1rem; color:#fff;}
-button:hover { opacity:.9; transform:scale(1.02); transition:0.3s;}
-.tx-item { transition: all .3s ease; }
-.tx-item:hover { background: rgba(255,255,255,0.05); transform: translateX(5px);}
+
+.toast {
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  background:#111;
+  padding:12px;
+  border-radius:8px;
+  opacity:0;
+  transition:.3s;
+}
 </style>
 </head>
+
 <body class="p-4">
 
 <script>
-if(localStorage.getItem("loggedIn") !== "true"){ location.href = "login.html"; }
+if(localStorage.getItem("loggedIn") !== "true"){
+  location.href = "login.html";
+}
 </script>
 
 <!-- HEADER -->
 <div class="flex justify-between mb-6">
-  <h1 class="font-bold text-xl">💳 SMORK'S PAYDOM</h1>
-  <button onclick="logout()" class="text-red-400 font-semibold hover:text-red-300">Logout</button>
-</div>
-
-<!-- PROMO CAROUSEL -->
-<div class="carousel glass mb-6">
-  <div id="carouselInner" class="carousel-inner">
-    <div class="carousel-item bg-gradient-to-r from-yellow-500 to-yellow-400 text-black">🎉 Welcome! Pay bills, send money, top up easily.</div>
-    <div class="carousel-item bg-gradient-to-r from-blue-500 to-indigo-500">⚡ Recharge TV, Electricity & Internet instantly!</div>
-    <div class="carousel-item bg-gradient-to-r from-pink-500 to-purple-500">💳 Bank transfers with selectable banks & accounts!</div>
-  </div>
+  <h1 class="font-bold">💳 SMORK'S PAYDOM</h1>
+  <button onclick="logout()" class="text-red-400">Logout</button>
 </div>
 
 <!-- WALLET -->
-<div class="glass p-6 rounded-2xl mb-6 shadow-lg">
+<div class="glass p-6 rounded-2xl mb-6">
   <p class="text-gray-400">Balance</p>
-  <h2 id="balance" class="text-3xl font-bold transition-all duration-300"></h2>
-  <button onclick="toggleBalance()" class="text-yellow-400 text-sm mt-1">Toggle</button>
+  <h2 id="balance" class="text-3xl font-bold"></h2>
+
+  <!-- EYE TOGGLE -->
+  <button onclick="toggleBalance()" class="text-yellow-400 text-sm mt-1">
+    <i id="eyeIcon" class="fa-solid fa-eye"></i>
+  </button>
+
+  <!-- ACCOUNT NUMBER -->
+  <p class="text-gray-400 text-sm mt-2">
+    Account No: <span id="acctNum"></span>
+  </p>
 </div>
 
 <!-- ACTIONS -->
 <div class="grid grid-cols-3 gap-4 mb-6">
-  <button onclick="openPayment('Bank')" class="glass p-4 rounded-xl font-semibold hover:bg-white/5 transition">Bank</button>
-  <button onclick="openPayment('Airtime')" class="glass p-4 rounded-xl font-semibold hover:bg-white/5 transition">Airtime</button>
-  <button onclick="openPayment('TV')" class="glass p-4 rounded-xl font-semibold hover:bg-white/5 transition">TV</button>
-  <button onclick="openPayment('Electricity')" class="glass p-4 rounded-xl font-semibold hover:bg-white/5 transition">Electricity</button>
-  <button onclick="openPayment('Internet')" class="glass p-4 rounded-xl font-semibold hover:bg-white/5 transition">Internet</button>
-  <button onclick="openPayment('Data')" class="glass p-4 rounded-xl font-semibold hover:bg-white/5 transition">Data</button>
+  <button onclick="openModal('Send')" class="glass p-4 rounded-xl">Send</button>
+  <button onclick="openModal('Receive')" class="glass p-4 rounded-xl">Receive</button>
+  <button onclick="openModal('Fund')" class="glass p-4 rounded-xl">Fund</button>
 </div>
 
 <!-- CHART -->
-<canvas id="chart" height="120" class="glass p-4 rounded-xl mb-6 shadow-lg"></canvas>
+<canvas id="chart" height="100" class="glass p-2 rounded-xl mb-6"></canvas>
 
-<!-- TX HISTORY -->
-<div class="glass p-4 rounded-xl mb-6 shadow-lg">
-  <h3 class="mb-2 font-semibold">Transactions</h3>
+<!-- TX -->
+<div class="glass p-4 rounded-xl">
+  <h3 class="mb-2">Transactions</h3>
   <div id="txList"></div>
 </div>
 
-<!-- PAYMENT MODAL -->
-<div id="paymentModal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-50">
-  <div class="glass p-6 rounded-xl w-80 shadow-2xl">
-    <h3 id="paymentTitle" class="text-lg font-semibold mb-3"></h3>
-    <select id="provider" class="w-full p-2 rounded text-black mb-3">
-      <option value="">Select Provider/Bank</option>
-    </select>
-    <input id="account" type="text" placeholder="Enter Account / Phone" class="w-full p-2 text-black rounded mb-3"/>
-    <input id="amount" type="number" placeholder="Enter Amount" class="w-full p-2 text-black rounded mb-3"/>
-    <button onclick="payBill()" class="w-full bg-yellow-400 p-2 mt-2 rounded font-semibold hover:bg-yellow-300 transition">Pay</button>
-    <button onclick="closePayment()" class="mt-2 text-gray-400 font-semibold hover:text-gray-200 transition w-full text-center">Cancel</button>
+<!-- MODAL -->
+<div id="modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center">
+  <div class="glass p-6 rounded-xl w-80">
+    <h3 id="modalTitle"></h3>
+
+    <input id="amt" type="number" placeholder="Amount" class="w-full p-2 mt-3 text-black rounded"/>
+
+    <!-- ACCOUNT INPUT -->
+    <input id="acctInput" type="text" placeholder="Account Number" class="w-full p-2 mt-2 text-black rounded"/>
+
+    <button onclick="handleTx()" class="w-full bg-yellow-400 p-2 mt-3 rounded">Confirm</button>
+    <button onclick="closeModal()" class="mt-2 text-gray-400">Cancel</button>
   </div>
 </div>
 
 <div id="toast" class="toast"></div>
 
-<!-- SOCIAL FLOATING BUTTON -->
+<!-- SOCIAL BUTTON -->
 <div id="socialBtn" class="fixed bottom-6 right-6 flex flex-col items-end gap-2">
   <div id="socialLinks" class="hidden flex flex-col gap-2 mb-2">
-    <a href="https://www.instagram.com/smork_frmdaeast?igsh=MWwwMHowMGhvcmY0dg==" target="_blank" class="glass p-2 rounded-full text-pink-400 flex items-center justify-center w-12 h-12">
-      <i class="fab fa-instagram"></i>
-    </a>
-    <a href="https://www.facebook.com/share/1DhHJPTRXL/" target="_blank" class="glass p-2 rounded-full text-blue-600 flex items-center justify-center w-12 h-12">
-      <i class="fab fa-facebook"></i>
-    </a>
-    <a href="https://www.linkedin.com/in/smorkfrmdaeast" target="_blank" class="glass p-2 rounded-full text-blue-400 flex items-center justify-center w-12 h-12">
-      <i class="fab fa-linkedin"></i>
-    </a>
-    <a href="https://github.com/Smorkfrmdaeast" target="_blank" class="glass p-2 rounded-full text-gray-400 flex items-center justify-center w-12 h-12">
-      <i class="fab fa-github"></i>
-    </a>
-    <a href="mailto:ifeanyinuels32@gmail.com" class="glass p-2 rounded-full text-yellow-400 flex items-center justify-center w-12 h-12">
-      <i class="fas fa-envelope"></i>
-    </a>
+    <a href="https://www.instagram.com/smork_frmdaeast?igsh=MWwwMHowMGhvcmY0dg==" target="_blank" class="glass p-2 rounded-full text-pink-400 w-12 h-12 flex items-center justify-center"><i class="fab fa-instagram"></i></a>
+    <a href="https://www.facebook.com/share/1DhHJPTRXL/" target="_blank" class="glass p-2 rounded-full text-blue-600 w-12 h-12 flex items-center justify-center"><i class="fab fa-facebook"></i></a>
+    <a href="https://www.linkedin.com/in/smorkfrmdaeast" target="_blank" class="glass p-2 rounded-full text-blue-400 w-12 h-12 flex items-center justify-center"><i class="fab fa-linkedin"></i></a>
+    <a href="https://github.com/Smorkfrmdaeast" target="_blank" class="glass p-2 rounded-full text-gray-400 w-12 h-12 flex items-center justify-center"><i class="fab fa-github"></i></a>
+    <a href="mailto:ifeanyinuels32@gmail.com" class="glass p-2 rounded-full text-yellow-400 w-12 h-12 flex items-center justify-center"><i class="fas fa-envelope"></i></a>
   </div>
-  <button id="toggleSocial" class="bg-yellow-400 w-14 h-14 rounded-full text-black text-2xl font-bold flex items-center justify-center">📱</button>
+  <button id="toggleSocial" class="bg-yellow-400 w-14 h-14 rounded-full text-black text-2xl flex items-center justify-center">📱</button>
 </div>
 
 <script>
 // STATE
 const state = {
-  balance: 120000,
+  balance: Number(localStorage.getItem("balance")) || 120000,
   tx: JSON.parse(localStorage.getItem("tx")) || [],
   visible: true,
-  paymentType: ""
+  type: "",
+  accountNumber: localStorage.getItem("acct") || generateAcct()
 };
+
+localStorage.setItem("acct", state.accountNumber);
+
+// GENERATE ACCOUNT NUMBER
+function generateAcct(){
+  return "30" + Math.floor(100000000 + Math.random() * 900000000);
+}
 
 // INIT
 updateUI();
 drawChart();
-startCarousel();
 
 // UI
-function updateUI(){ balance.innerText = state.visible ? "₦"+state.balance : "****"; renderTx(); }
-function toggleBalance(){ state.visible = !state.visible; updateUI(); }
-function logout(){ localStorage.removeItem("loggedIn"); location.href="login.html"; }
-
-// CAROUSEL
-let carouselIndex = 0;
-function startCarousel(){
-  const items = document.querySelectorAll('.carousel-item');
-  setInterval(()=>{
-    carouselIndex = (carouselIndex+1)%items.length;
-    document.getElementById("carouselInner").style.transform=`translateX(-${carouselIndex*100}%)`;
-  },4000);
+function updateUI(){
+  balance.innerText = state.visible ? "₦"+state.balance : "****";
+  acctNum.innerText = state.accountNumber;
+  renderTx();
 }
 
-// PAYMENT MODAL
-const providersList = {
-  Airtime:["MTN","Glo","Airtel","9Mobile"],
-  Electricity:["EkoElectric","IKEDC","PHED"],
-  TV:["DSTV","GOtv","Startimes"],
-  Internet:["Spectranet","Smile","IPNX"],
-  Bank:["Access","GTB","Zenith","FirstBank"],
-  Data:["MTN Data","Glo Data","Airtel Data"]
-};
-
-function openPayment(type){
-  document.getElementById("paymentModal").classList.remove("hidden");
-  document.getElementById("paymentTitle").innerText=type+" Payment";
-  const providerSelect=document.getElementById("provider");
-  providerSelect.innerHTML='<option value="">Select Provider/Bank</option>';
-  providersList[type].forEach(p=>{ providerSelect.innerHTML+=`<option value="${p}">${p}</option>`; });
-  document.getElementById("account").value="";
-  document.getElementById("amount").value="";
-  state.paymentType=type;
+// TOGGLE BALANCE
+function toggleBalance(){
+  state.visible = !state.visible;
+  updateUI();
+  eyeIcon.className = state.visible ? "fa-solid fa-eye" : "fa-solid fa-eye-slash";
 }
-function closePayment(){ document.getElementById("paymentModal").classList.add("hidden"); }
 
-function payBill(){
-  const amt=Number(document.getElementById("amount").value);
-  const provider=document.getElementById("provider").value;
-  const account=document.getElementById("account").value;
-  if(!amt || !provider || !account) return alert("Fill all fields");
-  if(amt>state.balance) return alert("Insufficient balance");
-  state.balance -= amt;
-  const label = state.paymentType==="Bank" ? `Bank Transfer to ${provider} (${account})` :
-                `${state.paymentType} Payment to ${provider} (${account})`;
-  addTx("Payment", -amt, label);
-  closePayment();
-  toast(`Paid ₦${amt} to ${provider} ✅`);
+// LOGOUT
+function logout(){
+  localStorage.removeItem("loggedIn");
+  location.href="login.html";
+}
+
+// MODAL
+function openModal(type){
+  state.type = type;
+  modal.classList.remove("hidden");
+  modalTitle.innerText = type + " Money";
+}
+function closeModal(){
+  modal.classList.add("hidden");
 }
 
 // TRANSACTIONS
-function addTx(type, amt, label=""){ state.tx.unshift({type, amt, label}); localStorage.setItem("tx", JSON.stringify(state.tx)); renderTx(); }
+function handleTx(){
+  const amt = Number(amt.value);
+  const acct = acctInput.value;
+
+  if(!amt) return;
+
+  fakeLoad(()=>{
+
+    if(acct && acct === state.accountNumber){
+      state.balance += amt;
+      addTx("Received (Demo)", amt);
+      toast("Money received 💸");
+    } else {
+      if(state.type==="Send"){ state.balance -= amt; addTx("Sent",-amt); }
+      if(state.type==="Receive"){ state.balance += amt; addTx("Received",amt); }
+      if(state.type==="Fund"){ state.balance += amt; addTx("Funded",amt); }
+    }
+
+    localStorage.setItem("balance", state.balance);
+
+    updateUI();
+    drawChart();
+    closeModal();
+    toast("Success ✅");
+  });
+}
+
+// STORAGE
+function addTx(type,amt){
+  state.tx.unshift({type,amt});
+  localStorage.setItem("tx", JSON.stringify(state.tx));
+}
+
+// RENDER
 function renderTx(){
   txList.innerHTML="";
-  state.tx.slice(0,10).forEach(t=>{
-    const icon = t.type==="Sent"?'<i class="fas fa-arrow-up text-red-400"></i>':
-                 t.type==="Received"?'<i class="fas fa-arrow-down text-green-400"></i>':
-                 t.type==="Funded"?'<i class="fas fa-wallet text-yellow-400"></i>':
-                 t.type==="Payment"?'<i class="fas fa-money-bill-wave text-blue-400"></i>':'';
-    const text = t.label ? t.label : t.type;
+  state.tx.slice(0,5).forEach(t=>{
     txList.innerHTML+=`
-    <div class="flex justify-between fade-in p-2 rounded tx-item">
-      <span>${icon} ${text}</span>
-      <span style="color:${t.amt>0?'#22c55e':'#ef4444'}">${t.amt>0?'+':''}₦${Math.abs(t.amt)}</span>
+    <div class="flex justify-between fade-in">
+      <span>${t.type}</span>
+      <span style="color:${t.amt>0?'#22c55e':'#ef4444'}">
+        ${t.amt>0?'+':''}₦${Math.abs(t.amt)}
+      </span>
     </div>`;
   });
 }
 
 // TOAST
-function toast(msg){ const t = document.getElementById("toast"); t.innerText=msg; t.style.opacity=1; setTimeout(()=>t.style.opacity=0,2500); }
+function toast(msg){
+  const t = document.getElementById("toast");
+  t.innerText=msg;
+  t.style.opacity=1;
+  setTimeout(()=>t.style.opacity=0,2000);
+}
+
+// FAKE LOAD
+function fakeLoad(cb){
+  toast("Processing...");
+  setTimeout(cb,1000);
+}
 
 // CHART
 function drawChart(){
   const ctx=chart.getContext("2d");
-  ctx.clearRect(0,0,400,120);
+  ctx.clearRect(0,0,300,100);
+
   const vals=state.tx.slice(0,5).map(t=>Math.abs(t.amt));
   const max=Math.max(...vals,1000);
+
   vals.forEach((v,i)=>{
-    const h=(v/max)*100;
+    const h=(v/max)*80;
     ctx.fillStyle="#facc15";
-    ctx.fillRect(i*60+10,120-h,40,h);
+    ctx.fillRect(i*50+10,100-h,30,h);
   });
 }
 
-// SOCIAL BUTTON
-const toggleBtn = document.getElementById("toggleSocial");
-const links = document.getElementById("socialLinks");
-toggleBtn.addEventListener("click", ()=>{ links.classList.toggle("hidden"); });
+// SOCIAL TOGGLE
+toggleSocial.onclick = ()=> {
+  socialLinks.classList.toggle("hidden");
+};
 </script>
 
 </body>
