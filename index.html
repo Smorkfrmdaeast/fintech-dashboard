@@ -36,17 +36,13 @@ if(localStorage.getItem("loggedIn") !== "true"){ location.href = "login.html"; }
   <button onclick="logout()" class="text-red-400 font-semibold hover:text-red-300">Logout</button>
 </div>
 
-<!-- PROFILE / AVATAR + ACCOUNT NUMBER -->
-<div class="glass p-4 rounded-2xl flex flex-col gap-2 mb-4">
-  <div class="flex items-center gap-3">
-    <img src="" id="profileAvatar" class="w-12 h-12 rounded-full"/>
-    <div>
-      <p class="text-gray-400 text-sm">Logged in as</p>
-      <p id="profileEmail" class="font-semibold">user@example.com</p>
-    </div>
+<!-- PROFILE / AVATAR -->
+<div class="glass p-4 rounded-2xl mb-6 flex items-center gap-3">
+  <img id="avatar" src="" class="w-12 h-12 rounded-full"/>
+  <div>
+    <p id="profileEmail" class="text-gray-300 font-semibold">user@example.com</p>
+    <p id="accountNumber" class="text-yellow-400 font-bold">0000000000</p>
   </div>
-  <p class="text-gray-400 text-sm">Account Number</p>
-  <p id="profileAcct" class="font-semibold text-yellow-400">0000000000</p>
 </div>
 
 <!-- PROMO CAROUSEL -->
@@ -103,7 +99,7 @@ if(localStorage.getItem("loggedIn") !== "true"){ location.href = "login.html"; }
 
 <div id="toast" class="toast"></div>
 
-<!-- SOCIAL FLOATING BUTTON -->
+<!-- SOCIAL FLOAT -->
 <div id="socialBtn" class="fixed bottom-6 right-6 flex flex-col items-end gap-2">
   <div id="socialLinks" class="hidden flex flex-col gap-2 mb-2">
     <a href="https://www.instagram.com/smork_frmdaeast?igsh=MWwwMHowMGhvcmY0dg==" target="_blank" class="glass p-2 rounded-full text-pink-400 flex items-center justify-center w-12 h-12">
@@ -138,21 +134,7 @@ const state = {
 updateUI();
 drawChart();
 startCarousel();
-
-// USER EMAIL + ACCOUNT
-const email = localStorage.getItem("userEmail") || "user@example.com";
-document.getElementById("profileEmail").innerText = email;
-
-let acctNumber = localStorage.getItem("userAcct");
-if(!acctNumber){
-  acctNumber = Math.floor(1000000000 + Math.random() * 9000000000); // 10-digit
-  localStorage.setItem("userAcct", acctNumber);
-}
-document.getElementById("profileAcct").innerText = acctNumber;
-
-// Avatar from initials
-const initials = email.split("@")[0].charAt(0).toUpperCase();
-document.getElementById("profileAvatar").src = `https://ui-avatars.com/api/?name=${initials}&background=FACC15&color=0b0f1a`;
+loadProfile();
 
 // PROVIDERS
 const providers = {
@@ -167,7 +149,7 @@ const providers = {
 // UI FUNCTIONS
 function updateUI(){ balance.innerText = state.visible ? "₦"+state.balance : "****"; renderTx(); }
 function toggleBalance(){ state.visible = !state.visible; updateUI(); }
-function logout(){ localStorage.removeItem("loggedIn"); location.href="login.html"; }
+function logout(){ localStorage.removeItem("loggedIn"); localStorage.removeItem("loggedInEmail"); localStorage.removeItem("accountNumber"); location.href="login.html"; }
 
 // CAROUSEL
 let carouselIndex = 0;
@@ -177,6 +159,21 @@ function startCarousel(){
     carouselIndex = (carouselIndex+1)%items.length;
     document.getElementById("carouselInner").style.transform=`translateX(-${carouselIndex*100}%)`;
   },4000);
+}
+
+// LOAD PROFILE
+function loadProfile(){
+  const email = localStorage.getItem("loggedInEmail") || "user@example.com";
+  const acctNum = localStorage.getItem("accountNumber") || generateAccountNumber();
+  document.getElementById("profileEmail").innerText = email;
+  document.getElementById("accountNumber").innerText = acctNum;
+  document.getElementById("avatar").src = `https://ui-avatars.com/api/?name=${encodeURIComponent(email)}&background=0D8ABC&color=fff&size=64`;
+  localStorage.setItem("accountNumber", acctNum);
+}
+
+// GENERATE UNIQUE ACCOUNT NUMBER
+function generateAccountNumber(){
+  return Math.floor(1000000000 + Math.random()*9000000000); // 10-digit number
 }
 
 // PAYMENT MODAL
