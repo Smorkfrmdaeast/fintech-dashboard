@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fintech Dashboard</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+<style>
+body { background:#0b0f1a; color:white; font-family:system-ui; }
+
+.glass {
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(12px);
+  border:1px solid rgba(255,255,255,0.1);
+}
+
+.fade-in { animation:fade .4s ease; }
+@keyframes fade { from{opacity:0;transform:translateY(10px);} to{opacity:1;} }
+
+.toast {
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  background:#111;
+  padding:12px;
+  border-radius:8px;
+  opacity:0;
+  transition:.3s;
+}
+</style>
+</head>
+
+<body class="p-4">
+
+<script>
+if(localStorage.getItem("loggedIn") !== "true"){
+  location.href = "login.html";
+}
+</script>
+
+<!-- HEADER -->
+<div class="flex justify-between mb-6">
+  <h1 class="font-bold">💳 Fintech</h1>
+  <button onclick="logout()" class="text-red-400">Logout</button>
+</div>
+
+<!-- WALLET -->
+<div class="glass p-6 rounded-2xl mb-6">
+  <p class="text-gray-400">Balance</p>
+  <h2 id="balance" class="text-3xl font-bold"></h2>
+  <button onclick="toggleBalance()" class="text-yellow-400 text-sm">Toggle</button>
+</div>
+
+<!-- ACTIONS -->
+<div class="grid grid-cols-3 gap-4 mb-6">
+  <button onclick="openModal('Send')" class="glass p-4 rounded-xl">Send</button>
+  <button onclick="openModal('Receive')" class="glass p-4 rounded-xl">Receive</button>
+  <button onclick="openModal('Fund')" class="glass p-4 rounded-xl">Fund</button>
+</div>
+
+<!-- CHART -->
+<canvas id="chart" height="100" class="glass p-2 rounded-xl mb-6"></canvas>
+
+<!-- TX -->
+<div class="glass p-4 rounded-xl">
+  <h3 class="mb-2">Transactions</h3>
+  <div id="txList"></div>
+</div>
+
+<!-- MODAL -->
+<div id="modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center">
+  <div class="glass p-6 rounded-xl w-80">
+    <h3 id="modalTitle"></h3>
+    <input id="amt" type="number" class="w-full p-2 mt-3 text-black rounded"/>
+    <button onclick="handleTx()" class="w-full bg-yellow-400 p-2 mt-3 rounded">Confirm</button>
+    <button onclick="closeModal()" class="mt-2 text-gray-400">Cancel</button>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+// STATE
+const state = {
+  balance: 120000,
+  tx: JSON.parse(localStorage.getItem("tx")) || [],
+  visible: true,
+  type: ""
+};
+
+// INIT
+updateUI();
+drawChart();
+
+// UI
+function updateUI(){
+  balance.innerText = state.visible ? "₦"+state.balance : "****";
+  renderTx();
+}
+
+function toggleBalance(){
+  state.visible = !state.visible;
+  updateUI();
+}
+
+function logout(){
+  localStorage.removeItem("loggedIn");
+  location.href="login.html";
+}
+
+// MODAL
+function openModal(type){
+  state.type = type;
+  modal.classList.remove("hidden");
+  modalTitle.innerText = type + " Money";
+}
+function closeModal(){
+  modal.classList.add("hidden");
+}
+
+// TX PROCESS
+function handleTx(){
+  const amt = Number(document.getElementById("amt").value);
+  if(!amt) return;
+
+  fakeLoad(()=>{
+    if(state.type==="Send"){ state.balance-=amt; addTx("Sent",-amt);}
+    if(state.type==="Receive"){ state.balance+=amt; addTx("Received",amt);}
+    if(state.type==="Fund"){ state.balance+=amt; addTx("Funded",amt);}
+
+    updateUI();
+    drawChart();
+    closeModal();
+    toast("Success ✅");
+  });
+}
+
+// STORAGE
+function addTx(type,amt){
+  state.tx.unshift({type,amt});
+  localStorage.setItem("tx", JSON.stringify(state.tx));
+}
+
+// RENDER
+function renderTx(){
+  txList.innerHTML="";
+  state.tx.slice(0,5).forEach(t=>{
+    txList.innerHTML+=`
+    <div class="flex justify-between fade-in">
+      <span>${t.type}</span>
+      <span style="color:${t.amt>0?'#22c55e':'#ef4444'}">
+        ${t.amt>0?'+':''}₦${Math.abs(t.amt)}
+      </span>
+    </div>`;
+  });
+}
+
+// TOAST
+function toast(msg){
+  const t = document.getElementById("toast");
+  t.innerText=msg;
+  t.style.opacity=1;
+  setTimeout(()=>t.style.opacity=0,2000);
+}
+
+// FAKE LOAD
+function fakeLoad(cb){
+  toast("Processing...");
+  setTimeout(cb,1000);
+}
+
+// CHART
+function drawChart(){
+  const ctx=chart.getContext("2d");
+  ctx.clearRect(0,0,300,100);
+
+  const vals=state.tx.slice(0,5).map(t=>Math.abs(t.amt));
+  const max=Math.max(...vals,1000);
+
+  vals.forEach((v,i)=>{
+    const h=(v/max)*80;
+    ctx.fillStyle="#facc15";
+    ctx.fillRect(i*50+10,100-h,30,h);
+  });
+}
+</script>
+
+</body>
+</html>
