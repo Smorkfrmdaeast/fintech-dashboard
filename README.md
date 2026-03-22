@@ -26,6 +26,7 @@ smorks-paydom/
 ├─ README.md            # Project documentation
 ├─ style.css (optional) # Custom styles if separated
 └─ assets/              # Images, icons, or external assets
+
 🚀 How to Run
 Clone or download the repository.
 Open login.html in your browser.
