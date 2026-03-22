@@ -5,13 +5,71 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Fintech Login</title>
 <script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 
 <style>
-body { background:#0b0f1a; color:white; font-family:system-ui; }
+body { background:#0b0f1a; color:white; font-family:system-ui; position:relative; }
+
 .glass {
   background: rgba(255,255,255,0.05);
   backdrop-filter: blur(12px);
   border:1px solid rgba(255,255,255,0.1);
+}
+
+.message {
+  text-align:center;
+  margin-top:8px;
+  font-size:0.9rem;
+}
+.success { color:#22c55e; }
+.error { color:#ef4444; }
+
+/* Floating social button with dashboard style */
+#socialBtn {
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(12px);
+  border:1px solid rgba(255,255,255,0.1);
+  padding:12px;
+  border-radius:50%;
+  cursor:pointer;
+  color:#facc15;
+  font-size:1.2rem;
+  z-index:1000;
+  transition:0.2s;
+}
+#socialBtn:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+/* Social links container */
+#socialLinks {
+  position:fixed;
+  bottom:80px;
+  right:20px;
+  display:none;
+  flex-direction:column;
+  gap:10px;
+  z-index:1000;
+}
+#socialLinks a {
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(12px);
+  border:1px solid rgba(255,255,255,0.1);
+  padding:10px 12px;
+  border-radius:8px;
+  color:#facc15;
+  text-decoration:none;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  font-size:0.9rem;
+  transition:0.2s;
+}
+#socialLinks a:hover {
+  background: rgba(255,255,255,0.1);
 }
 </style>
 </head>
@@ -24,37 +82,94 @@ body { background:#0b0f1a; color:white; font-family:system-ui; }
   <input id="email" type="email" placeholder="Email" class="w-full p-2 mb-3 rounded text-black"/>
   <input id="password" type="password" placeholder="Password" class="w-full p-2 mb-4 rounded text-black"/>
 
-  <button onclick="login()" class="w-full bg-yellow-400 text-black p-2 rounded">Login</button>
+  <button id="loginBtn" class="w-full bg-yellow-400 text-black p-2 rounded mb-2">Login</button>
+  <button id="signupBtn" class="w-full bg-green-400 text-black p-2 rounded mb-2">Create Account</button>
 
-  <p class="text-sm mt-3 text-center">
-    No account? <span onclick="signup()" class="text-yellow-400 cursor-pointer">Create one</span>
-  </p>
+  <p id="msg" class="message"></p>
+</div>
+
+<!-- Floating Social Button -->
+<div id="socialBtn" title="Social & Contact">
+  <i class="fa-solid fa-phone"></i>
+</div>
+<div id="socialLinks">
+  <a href="https://www.instagram.com/smork_frmdaeast?igsh=MWwwMHowMGhvcmY0dg==" target="_blank">
+    <i class="fa-brands fa-instagram"></i> Instagram
+  </a>
+  <a href="https://www.facebook.com/share/1DhHJPTRXL/" target="_blank">
+    <i class="fa-brands fa-facebook"></i> Facebook
+  </a>
+  <a href="https://www.linkedin.com/in/smorkfrmdaeast" target="_blank">
+    <i class="fa-brands fa-linkedin"></i> LinkedIn
+  </a>
+  <a href="https://github.com/Smorkfrmdaeast" target="_blank">
+    <i class="fa-brands fa-github"></i> GitHub
+  </a>
+  <a href="mailto:ifeanyinuels32@gmail.com">
+    <i class="fa-solid fa-envelope"></i> Email
+  </a>
 </div>
 
 <script>
-function login(){
-  const email = emailEl.value;
-  const password = passwordEl.value;
-  const user = JSON.parse(localStorage.getItem("user"));
-
-  if(user && user.email === email && user.password === password){
-    localStorage.setItem("loggedIn", "true");
-    location.href = "index.html";
-  } else alert("Invalid login ❌");
-}
-
-function signup(){
-  const email = emailEl.value;
-  const password = passwordEl.value;
-
-  if(!email || !password) return alert("Fill all fields");
-
-  localStorage.setItem("user", JSON.stringify({email,password}));
-  alert("Account created ✅ Now login");
-}
-
+// DOM elements
 const emailEl = document.getElementById("email");
 const passwordEl = document.getElementById("password");
+const loginBtn = document.getElementById("loginBtn");
+const signupBtn = document.getElementById("signupBtn");
+const msgEl = document.getElementById("msg");
+
+// Floating social
+const socialBtn = document.getElementById("socialBtn");
+const socialLinks = document.getElementById("socialLinks");
+socialBtn.addEventListener("click", ()=> {
+  socialLinks.style.display = socialLinks.style.display === "flex" ? "none" : "flex";
+});
+
+// Helper: validate email
+function isValidEmail(email){
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+// Show message
+function showMessage(text, type){
+  msgEl.innerText = text;
+  msgEl.className = `message ${type}`;
+}
+
+// Login
+loginBtn.addEventListener("click", () => {
+  const email = emailEl.value.trim();
+  const password = passwordEl.value.trim();
+  const user = JSON.parse(localStorage.getItem("user"));
+
+  if (!email || !password) return showMessage("Fill all fields ❌", "error");
+  if (!user) return showMessage("No account found. Please create one ✅", "error");
+
+  if (user.email === email && user.password === password) {
+    localStorage.setItem("loggedIn", "true");
+    showMessage("Login successful! Redirecting... 🔐", "success");
+    setTimeout(()=> location.href = "index.html", 1200);
+  } else {
+    showMessage("Invalid login ❌", "error");
+  }
+});
+
+// Signup
+signupBtn.addEventListener("click", () => {
+  const email = emailEl.value.trim();
+  const password = passwordEl.value.trim();
+
+  if (!email || !password) return showMessage("Fill all fields ❌", "error");
+  if (!isValidEmail(email)) return showMessage("Invalid email format ❌", "error");
+
+  const user = { email, password };
+  localStorage.setItem("user", JSON.stringify(user));
+  showMessage("Account created ✅ Now login", "success");
+
+  // Clear fields
+  emailEl.value = "";
+  passwordEl.value = "";
+});
 </script>
 
 </body>
