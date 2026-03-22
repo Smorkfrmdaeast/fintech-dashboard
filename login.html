@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fintech Login</title>
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+body { background:#0b0f1a; color:white; font-family:system-ui; }
+.glass {
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(12px);
+  border:1px solid rgba(255,255,255,0.1);
+}
+</style>
+</head>
+
+<body class="flex items-center justify-center min-h-screen">
+
+<div class="glass p-8 rounded-xl w-80">
+  <h2 class="text-xl font-bold mb-4 text-center">🔐 Fintech Login</h2>
+
+  <input id="email" type="email" placeholder="Email" class="w-full p-2 mb-3 rounded text-black"/>
+  <input id="password" type="password" placeholder="Password" class="w-full p-2 mb-4 rounded text-black"/>
+
+  <button onclick="login()" class="w-full bg-yellow-400 text-black p-2 rounded">Login</button>
+
+  <p class="text-sm mt-3 text-center">
+    No account? <span onclick="signup()" class="text-yellow-400 cursor-pointer">Create one</span>
+  </p>
+</div>
+
+<script>
+function login(){
+  const email = emailEl.value;
+  const password = passwordEl.value;
+  const user = JSON.parse(localStorage.getItem("user"));
+
+  if(user && user.email === email && user.password === password){
+    localStorage.setItem("loggedIn", "true");
+    location.href = "index.html";
+  } else alert("Invalid login ❌");
+}
+
+function signup(){
+  const email = emailEl.value;
+  const password = passwordEl.value;
+
+  if(!email || !password) return alert("Fill all fields");
+
+  localStorage.setItem("user", JSON.stringify({email,password}));
+  alert("Account created ✅ Now login");
+}
+
+const emailEl = document.getElementById("email");
+const passwordEl = document.getElementById("password");
+</script>
+
+</body>
+</html>
