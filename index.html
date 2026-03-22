@@ -22,28 +22,30 @@ button:hover { opacity:.9; transform:scale(1.02); transition:0.3s;}
 .tx-item { transition: all .3s ease; }
 .tx-item:hover { background: rgba(255,255,255,0.05); transform: translateX(5px);}
 .eye-icon { cursor:pointer; }
+.profile-section { display:flex; align-items:center; gap:1rem; margin-bottom:1rem; }
+.profile-avatar { width:50px; height:50px; border-radius:50%; background:#ccc; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:1.2rem; color:#111; }
+.profile-email { font-weight:600; }
 </style>
 </head>
 <body class="p-4">
 
 <script>
 if(localStorage.getItem("loggedIn") !== "true"){ location.href = "login.html"; }
+
+// Example: When account is created, store email in localStorage
+// localStorage.setItem("userEmail", "smork@example.com");
 </script>
 
 <!-- HEADER -->
 <div class="flex justify-between mb-6">
-  <h1 class="font-bold text-xl"> SMORK'S PAYDOM</h1>
+  <h1 class="font-bold text-xl">💳 SMORK'S PAYDOM</h1>
   <button onclick="logout()" class="text-red-400 font-semibold hover:text-red-300">Logout</button>
 </div>
 
-<!-- PROFILE / ACCOUNT SECTION -->
-<div class="glass p-4 rounded-2xl mb-6 flex items-center gap-4 shadow-lg">
-  <div class="w-14 h-14 rounded-full bg-yellow-400 flex items-center justify-center text-black font-bold text-xl" id="avatar">U</div>
-  <div>
-    <p class="text-gray-400 text-sm">Logged in as</p>
-    <h2 id="userEmail" class="font-semibold text-lg">user@example.com</h2>
-    <p id="accountNumber" class="text-gray-400 text-sm">Account: 0001234567</p>
-  </div>
+<!-- PROFILE / ACCOUNT -->
+<div class="profile-section glass p-4 rounded-xl shadow-lg">
+  <div class="profile-avatar" id="profileAvatar">U</div>
+  <div class="profile-email" id="profileEmail">user@example.com</div>
 </div>
 
 <!-- PROMO CAROUSEL -->
@@ -135,22 +137,7 @@ const state = {
 updateUI();
 drawChart();
 startCarousel();
-initProfile(); // initialize profile
-
-// USER PROFILE
-function initProfile() {
-  const email = localStorage.getItem("userEmail") || "user@example.com";
-  const acctNum = localStorage.getItem("accountNumber") || generateAccountNumber();
-  const initials = email.charAt(0).toUpperCase();
-  document.getElementById("userEmail").innerText = email;
-  document.getElementById("accountNumber").innerText = `Account: ${acctNum}`;
-  document.getElementById("avatar").innerText = initials;
-}
-function generateAccountNumber(){
-  let num = Math.floor(1000000000 + Math.random()*9000000000);
-  localStorage.setItem("accountNumber", num);
-  return num;
-}
+setProfile();
 
 // PROVIDERS
 const providers = {
@@ -161,6 +148,13 @@ const providers = {
   Internet: ["Spectranet", "Smile", "IPNX", "Swift Networks"],
   Bank: ["Access Bank","GTBank","Zenith Bank","First Bank","UBA","Fidelity Bank","Union Bank","Sterling Bank","Polaris Bank","Wema Bank","FCMB","Stanbic IBTC","Keystone Bank","Jaiz Bank","Titan Trust Bank","Providus Bank","Kuda Bank","Opay","PalmPay","Moniepoint"]
 };
+
+// PROFILE
+function setProfile(){
+  const email = localStorage.getItem("userEmail") || "user@example.com";
+  document.getElementById("profileEmail").innerText = email;
+  document.getElementById("profileAvatar").innerText = email.charAt(0).toUpperCase();
+}
 
 // UI FUNCTIONS
 function updateUI(){ balance.innerText = state.visible ? "₦"+state.balance : "****"; renderTx(); }
@@ -243,4 +237,4 @@ document.getElementById("toggleSocial").addEventListener("click", ()=>{
 </script>
 
 </body>
-</html>
+    </html>
