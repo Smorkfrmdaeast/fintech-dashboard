@@ -1,0 +1,6 @@
+{
+  "name": "SMORK'S PAYDOM",
+  "description": "Modern, interactive fintech dashboard for wallet management, bill payments, money transfers, and transaction analytics.",
+  "permissions": [],
+  "capabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
